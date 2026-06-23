@@ -9,11 +9,11 @@ public class Problema01_Arquero  extends Problema01_Personaje {
     }
     @Override
     public int calcularAtaque() {
-        return this.fuerza + (this.precision / 2);
+        return this.fuerza + (this.precision / 2) + getBonusAtaque();
     }
     @Override
     public int calcularDefensa() {
-        return this.defensa + (this.precision / 4);
+        return this.defensa + (this.precision / 4) + getBonusDefensa();
     }
     @Override
     public String obtenerHabilidadEspecial() {

@@ -1,6 +1,8 @@
 
 package problema01.problema01;
 
+import java.util.ArrayList;
+
 public abstract class Problema01_Personaje {
     protected String nombre;
     protected int nivel;
@@ -9,6 +11,8 @@ public abstract class Problema01_Personaje {
     protected int fuerza;
     protected int defensa;
     protected int experiencia;
+    protected ArrayList<Objeto> inventario;
+    protected Objeto objetoEquipado;
 
     public Problema01_Personaje(String nombre, int puntosVidaMaximos, int fuerza, int defensa) {
         this.nombre = nombre;
@@ -18,7 +22,36 @@ public abstract class Problema01_Personaje {
         this.fuerza = fuerza;
         this.defensa = defensa;
         this.experiencia = 0;
+        this.inventario = new ArrayList<Objeto>();
+        this.objetoEquipado = null;
     }
+
+    public void agregarObjeto(Objeto objeto) {
+        this.inventario.add(objeto);
+    }
+
+    public void equipar(Objeto objeto) {
+        if (this.inventario.contains(objeto)) {
+            this.objetoEquipado = objeto;
+        }
+    }
+
+    protected int getBonusAtaque() {
+        if (objetoEquipado != null) {
+            return objetoEquipado.getModificadorAtaque();
+        }
+        return 0;
+    }
+
+    protected int getBonusDefensa() {
+        if (objetoEquipado != null) {
+            return objetoEquipado.getModificadorDefensa();
+        }
+        return 0;
+    }
+
+    public Objeto getObjetoEquipado() { return objetoEquipado; }
+    public ArrayList<Objeto> getInventario() { return inventario; }
 
     
     public abstract int calcularAtaque();
@@ -61,8 +94,12 @@ public abstract class Problema01_Personaje {
 
     @Override
     public String toString() {
-        return String.format("[%s] %s - Nivel: %d | PV: %d/%d | Fuerza: %d | Defensa: %d | EXP: %d/100",
+        String equipo = "Ninguno";
+        if (objetoEquipado != null) {
+            equipo = objetoEquipado.getNombre();
+        }
+        return String.format("[%s] %s - Nivel: %d | PV: %d/%d | Fuerza: %d | Defensa: %d | EXP: %d/100 | Equipado: %s",
                 this.getClass().getSimpleName().replace("Problema01_", ""),
-                nombre, nivel, puntosVida, puntosVidaMaximos, fuerza, defensa, experiencia);
+                nombre, nivel, puntosVida, puntosVidaMaximos, fuerza, defensa, experiencia, equipo);
     }
 }
