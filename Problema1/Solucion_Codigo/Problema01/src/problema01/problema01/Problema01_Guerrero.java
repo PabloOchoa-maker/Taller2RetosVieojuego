@@ -13,6 +13,7 @@ public class Problema01_Guerrero extends Problema01_Personaje {
         return this.fuerza + this.fuerzaEscudo;
     }
 
+    
     @Override
     public int calcularDefensa() {
         return this.defensa + this.fuerzaEscudo + getBonusDefensa();
@@ -21,5 +22,15 @@ public class Problema01_Guerrero extends Problema01_Personaje {
     @Override
     public String obtenerHabilidadEspecial() {
         return "Carga con Escudo";
+    }
+
+    @Override
+    public int getCostoEnergiaHabilidad() {
+        return 25;
+    }
+
+    @Override
+    public int getCooldownHabilidad() {
+        return 2;
     }
 }

@@ -117,12 +117,12 @@ public class Problema01_Ejecutor {
                 + p2.getNombre().toUpperCase() + "!");
         System.out.println("Habilidad Especial de " + p1.getNombre() + ": " + p1.obtenerHabilidadEspecial());
         System.out.println("Habilidad Especial de " + p2.getNombre() + ": " + p2.obtenerHabilidadEspecial());
+        System.out.println("Energía de " + p1.getNombre() + ": " + p1.getEnergia() + "/" + p1.getEnergiaMaxima()
+                + " | Costo habilidad: " + p1.getCostoEnergiaHabilidad() + " | Cooldown: " + p1.getCooldownHabilidad() + " turnos");
+        System.out.println("Energía de " + p2.getNombre() + ": " + p2.getEnergia() + "/" + p2.getEnergiaMaxima()
+                + " | Costo habilidad: " + p2.getCostoEnergiaHabilidad() + " | Cooldown: " + p2.getCooldownHabilidad() + " turnos");
         System.out.println("\nPresione ENTER para procesar los turnos de combate...");
         teclado.nextLine();
-
-        // Cada peleador invoca su habilidad especial, que aplica un estado al inicio del duelo
-        aplicarEstadoHabilidad(p1, p2);
-        aplicarEstadoHabilidad(p2, p1);
 
         int turno = 1;
         while (p1.estaVivo() && p2.estaVivo()) {
@@ -148,8 +148,9 @@ public class Problema01_Ejecutor {
                 break;
             }
 
-            System.out.println("Estado actual: " + p1.getNombre() + " (" + p1.getPuntosVida() + " PV) | "
-                    + p2.getNombre() + " (" + p2.getPuntosVida() + " PV)");
+            System.out.println("Estado actual: " + p1.getNombre() + " (" + p1.getPuntosVida() + " PV, "
+                    + p1.getEnergia() + " EN) | "
+                    + p2.getNombre() + " (" + p2.getPuntosVida() + " PV, " + p2.getEnergia() + " EN)");
             turno++;
             System.out.println();
         }
@@ -167,11 +168,6 @@ public class Problema01_Ejecutor {
         }
     }
 
-    /**
-     * Procesa el turno de un atacante: primero aplica los efectos de sus estados
-     * activos (daño por turno, aturdimiento, buffs) y, si sigue vivo y no está
-     * incapacitado, ejecuta su ataque sobre el objetivo.
-     */
     private static void realizarTurno(Problema01_Personaje atacante, Problema01_Personaje objetivo) {
         boolean puedeAtacar = atacante.procesarEstadosYVerificarTurno();
 
@@ -184,19 +180,39 @@ public class Problema01_Ejecutor {
             return; // Incapacitado: pierde el turno (el mensaje ya fue impreso)
         }
 
+        // Al inicio del turno se regenera energía y se reduce el cooldown
+        atacante.regenerarRecursos();
+
+        // Se intenta usar la habilidad especial: requiere cooldown == 0 y energía suficiente
+        if (atacante.habilidadDisponible()) {
+            try {
+                int danoEspecial = atacante.usarHabilidadEspecial(objetivo);
+                System.out.println(" -> " + atacante.getNombre() + " ejecuta su habilidad especial "
+                        + atacante.obtenerHabilidadEspecial() + " causando " + danoEspecial + " de daño."
+                        + " (Energía: " + atacante.getEnergia() + "/" + atacante.getEnergiaMaxima()
+                        + " | Recarga: " + atacante.getCooldownActual() + " turno(s))");
+                // La habilidad especial aplica su estado al concretarse
+                aplicarEstadoHabilidad(atacante, objetivo);
+                return;
+            } catch (Problema01_EnergiaInsuficienteException e) {
+                System.out.println(" -> [SIN ENERGÍA] " + e.getMessage());
+                System.out.println("    " + atacante.getNombre() + " recurre a un ataque básico.");
+            }
+        } else {
+            System.out.println(" -> [EN RECARGA] " + atacante.obtenerHabilidadEspecial() + " de "
+                    + atacante.getNombre() + " no está disponible (" + atacante.getCooldownActual()
+                    + " turno(s) restantes). Realiza un ataque básico.");
+        }
+
+        // Ataque básico de respaldo: no consume energía ni aplica estados
         int ataque = atacante.calcularAtaque();
         int vidaAntes = objetivo.getPuntosVida();
         objetivo.recibirDano(ataque);
         int danoReal = vidaAntes - objetivo.getPuntosVida();
-        System.out.println(" -> " + atacante.getNombre() + " ejecuta " + atacante.obtenerHabilidadEspecial()
-                + " causando " + danoReal + " de daño efectivo.");
+        System.out.println(" -> " + atacante.getNombre() + " realiza un ataque básico causando "
+                + danoReal + " de daño efectivo.");
     }
-
-    /**
-     * Cada habilidad especial aplica un estado característico al inicio del duelo:
-     * la Bola de Fuego quema al rival, la Lluvia de Flechas lo aturde y la Carga
-     * con Escudo potencia el ataque del propio guerrero.
-     */
+ 
     private static void aplicarEstadoHabilidad(Problema01_Personaje atacante, Problema01_Personaje objetivo) {
         switch (atacante.obtenerHabilidadEspecial()) {
             case "Bola de Fuego" ->

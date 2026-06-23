@@ -19,4 +19,14 @@ public class Problema01_Mago extends Problema01_Personaje {
     public String obtenerHabilidadEspecial() {
         return "Bola de Fuego";
     }
+
+    @Override
+    public int getCostoEnergiaHabilidad() {
+        return 40;
+    }
+
+    @Override
+    public int getCooldownHabilidad() {
+        return 3;
+    }
 }

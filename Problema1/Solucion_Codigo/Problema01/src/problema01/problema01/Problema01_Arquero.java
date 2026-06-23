@@ -19,4 +19,14 @@ public class Problema01_Arquero  extends Problema01_Personaje {
     public String obtenerHabilidadEspecial() {
         return "Lluvia de Flechas";
     }
+
+    @Override
+    public int getCostoEnergiaHabilidad() {
+        return 30;
+    }
+
+    @Override
+    public int getCooldownHabilidad() {
+        return 2;
+    }
 }
