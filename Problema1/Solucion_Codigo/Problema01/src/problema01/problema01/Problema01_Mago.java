@@ -8,7 +8,7 @@ public class Problema01_Mago extends Problema01_Personaje {
         this.poderMagico = poderMagico;
     }
     @Override
-    public int calcularAtaque() {
+    public int obtenerDanoBase() {
         return this.fuerza + this.poderMagico;
     }
     @Override
