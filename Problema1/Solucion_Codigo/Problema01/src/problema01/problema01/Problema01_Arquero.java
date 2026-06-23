@@ -8,8 +8,8 @@ public class Problema01_Arquero  extends Problema01_Personaje {
         this.precision = precision;
     }
     @Override
-    public int calcularAtaque() {
-        return this.fuerza + (this.precision / 2) + getBonusAtaque();
+    public int obtenerDanoBase() {
+        return this.fuerza + (this.precision / 2);
     }
     @Override
     public int calcularDefensa() {

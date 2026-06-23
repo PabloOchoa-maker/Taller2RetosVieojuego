@@ -9,8 +9,8 @@ public class Problema01_Guerrero extends Problema01_Personaje {
     }
 
     @Override
-    public int calcularAtaque() {
-        return this.fuerza + this.fuerzaEscudo + getBonusAtaque();
+    public int obtenerDanoBase() {
+        return this.fuerza + this.fuerzaEscudo;
     }
 
     @Override
