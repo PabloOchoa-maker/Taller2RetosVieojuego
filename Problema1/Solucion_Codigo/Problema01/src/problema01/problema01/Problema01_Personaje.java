@@ -13,6 +13,14 @@ public abstract class Problema01_Personaje {
     protected ArrayList<Objeto> inventario;
     protected Objeto objetoEquipado;
 
+    // --- Sistema de Maná/Energía y Cooldown ---
+    protected int energia;
+    protected int energiaMaxima;
+    protected int cooldownActual;
+
+    /** Energía que el personaje recupera al inicio de cada uno de sus turnos. */
+    protected static final int REGENERACION_ENERGIA = 15;
+
     protected java.util.List<Problema01_Estados> listaEstados = new java.util.ArrayList<>();
 
     public Problema01_Personaje(String nombre, int puntosVidaMaximos, int fuerza, int defensa) {
@@ -25,6 +33,9 @@ public abstract class Problema01_Personaje {
         this.experiencia = 0;
         this.inventario = new ArrayList<Objeto>();
         this.objetoEquipado = null;
+        this.energiaMaxima = 100;
+        this.energia = this.energiaMaxima;
+        this.cooldownActual = 0;
     }
 
     public void agregarObjeto(Objeto objeto) {
@@ -122,6 +133,71 @@ public abstract class Problema01_Personaje {
     public abstract int calcularDefensa();
     public abstract String obtenerHabilidadEspecial();
 
+    /** Energía (maná) que cuesta lanzar la habilidad especial. */
+    public abstract int getCostoEnergiaHabilidad();
+
+    /** Turnos de recarga (cooldown) tras usar la habilidad especial. */
+    public abstract int getCooldownHabilidad();
+
+    // ============================================================
+    //   SISTEMA DE MANÁ/ENERGÍA Y COOLDOWN (estados temporales)
+    // ============================================================
+
+    /**
+     * Recupera energía y reduce el cooldown. Debe invocarse al inicio de
+     * cada turno del personaje para gestionar sus estados temporales.
+     */
+    public void regenerarRecursos() {
+        if (this.energia < this.energiaMaxima) {
+            this.energia += REGENERACION_ENERGIA;
+            if (this.energia > this.energiaMaxima) {
+                this.energia = this.energiaMaxima;
+            }
+        }
+        if (this.cooldownActual > 0) {
+            this.cooldownActual--;
+        }
+    }
+
+    /** La habilidad está disponible solo cuando no está en recarga. */
+    public boolean habilidadDisponible() {
+        return this.cooldownActual == 0;
+    }
+
+    /** Indica si el personaje dispone de energía para lanzar la habilidad. */
+    public boolean tieneEnergiaSuficiente() {
+        return this.energia >= getCostoEnergiaHabilidad();
+    }
+
+    /**
+     * Ejecuta la habilidad especial contra un objetivo. Valida el cooldown y,
+     * sobre todo, la energía: si no hay maná suficiente lanza una excepción.
+     *
+     * @return el daño efectivo causado al objetivo.
+     * @throws Problema01_EnergiaInsuficienteException si falta energía.
+     * @throws IllegalStateException si la habilidad está en recarga.
+     */
+    public int usarHabilidadEspecial(Problema01_Personaje objetivo)
+            throws Problema01_EnergiaInsuficienteException {
+        if (!habilidadDisponible()) {
+            throw new IllegalStateException("La habilidad '" + obtenerHabilidadEspecial()
+                    + "' está en recarga (" + this.cooldownActual + " turno(s) restantes).");
+        }
+        if (!tieneEnergiaSuficiente()) {
+            throw new Problema01_EnergiaInsuficienteException(this.nombre,
+                    obtenerHabilidadEspecial(), getCostoEnergiaHabilidad(), this.energia);
+        }
+
+        this.energia -= getCostoEnergiaHabilidad();
+        this.cooldownActual = getCooldownHabilidad();
+
+        // La habilidad especial golpea con más fuerza que un ataque básico.
+        int danoEspecial = (int) (calcularAtaque() * 1.5);
+        int vidaAntes = objetivo.getPuntosVida();
+        objetivo.recibirDano(danoEspecial);
+        return vidaAntes - objetivo.getPuntosVida();
+    }
+
     public void recibirDano(int danoRecibido) {
         int danoEfectivo = danoRecibido - calcularDefensa();
         if (danoEfectivo < 1) {
@@ -156,6 +232,9 @@ public abstract class Problema01_Personaje {
     public int getFuerza() { return fuerza; }
     public int getDefensa() { return defensa; }
     public int getExperiencia() { return experiencia; }
+    public int getEnergia() { return energia; }
+    public int getEnergiaMaxima() { return energiaMaxima; }
+    public int getCooldownActual() { return cooldownActual; }
 
     @Override
     public String toString() {
@@ -163,8 +242,8 @@ public abstract class Problema01_Personaje {
         if (objetoEquipado != null) {
             equipo = objetoEquipado.getNombre();
         }
-        return String.format("[%s] %s - Nivel: %d | PV: %d/%d | Fuerza: %d | Defensa: %d | EXP: %d/100 | Equipado: %s",
+        return String.format("[%s] %s - Nivel: %d | PV: %d/%d | Energía: %d/%d | Fuerza: %d | Defensa: %d | EXP: %d/100 | Equipado: %s",
                 this.getClass().getSimpleName().replace("Problema01_", ""),
-                nombre, nivel, puntosVida, puntosVidaMaximos, fuerza, defensa, experiencia, equipo);
+                nombre, nivel, puntosVida, puntosVidaMaximos, energia, energiaMaxima, fuerza, defensa, experiencia, equipo);
     }
 }
