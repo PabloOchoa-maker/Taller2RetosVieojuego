@@ -1,1 +1,4 @@
 /Problema1/Solucion_Codigo/Problema01/build/
+
+# Respaldos temporales de Dia
+*.dia~
