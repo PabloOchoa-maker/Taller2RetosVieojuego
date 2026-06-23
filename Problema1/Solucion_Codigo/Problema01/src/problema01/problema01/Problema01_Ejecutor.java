@@ -120,31 +120,31 @@ public class Problema01_Ejecutor {
         System.out.println("\nPresione ENTER para procesar los turnos de combate...");
         teclado.nextLine();
 
+        // Cada peleador invoca su habilidad especial, que aplica un estado al inicio del duelo
+        aplicarEstadoHabilidad(p1, p2);
+        aplicarEstadoHabilidad(p2, p1);
+
         int turno = 1;
         while (p1.estaVivo() && p2.estaVivo()) {
             System.out.println("--- Turno " + turno + " ---");
 
-            int ataqueP1 = p1.calcularAtaque();
-            int vidaAntesP2 = p2.getPuntosVida();
-            p2.recibirDano(ataqueP1);
-            int danoRealP2 = vidaAntesP2 - p2.getPuntosVida();
-            System.out.println(" -> " + p1.getNombre() + " ejecuta " + p1.obtenerHabilidadEspecial() + " causando "
-                    + danoRealP2 + " de daño efectivo.");
-
+            // Turno de P1: primero se procesan sus estados (veneno, aturdimiento, buff)
+            realizarTurno(p1, p2);
             if (!p2.estaVivo()) {
                 System.out.println(" ¡" + p2.getNombre() + " ha sido derrotado!");
                 break;
             }
+            if (!p1.estaVivo()) {
+                break; // P1 pudo caer por el daño de sus propios estados
+            }
 
-            int ataqueP2 = p2.calcularAtaque();
-            int vidaAntesP1 = p1.getPuntosVida();
-            p1.recibirDano(ataqueP2);
-            int danoRealP1 = vidaAntesP1 - p1.getPuntosVida();
-            System.out.println(" -> " + p2.getNombre() + " responde con " + p2.obtenerHabilidadEspecial() + " causando "
-                    + danoRealP1 + " de daño efectivo.");
-
+            // Turno de P2
+            realizarTurno(p2, p1);
             if (!p1.estaVivo()) {
                 System.out.println(" ¡" + p1.getNombre() + " ha sido derrotado!");
+                break;
+            }
+            if (!p2.estaVivo()) {
                 break;
             }
 
@@ -164,6 +164,50 @@ public class Problema01_Ejecutor {
             p2.ganarExperiencia(100);
         } else {
             System.out.println("\n¡EMPATE! Ambos personajes cayeron en combate.");
+        }
+    }
+
+    /**
+     * Procesa el turno de un atacante: primero aplica los efectos de sus estados
+     * activos (daño por turno, aturdimiento, buffs) y, si sigue vivo y no está
+     * incapacitado, ejecuta su ataque sobre el objetivo.
+     */
+    private static void realizarTurno(Problema01_Personaje atacante, Problema01_Personaje objetivo) {
+        boolean puedeAtacar = atacante.procesarEstadosYVerificarTurno();
+
+        // El daño por turno (veneno/quemadura) pudo derrotar al atacante en su propio turno
+        if (!atacante.estaVivo()) {
+            System.out.println(" ¡" + atacante.getNombre() + " ha caído por efecto de sus estados!");
+            return;
+        }
+        if (!puedeAtacar) {
+            return; // Incapacitado: pierde el turno (el mensaje ya fue impreso)
+        }
+
+        int ataque = atacante.calcularAtaque();
+        int vidaAntes = objetivo.getPuntosVida();
+        objetivo.recibirDano(ataque);
+        int danoReal = vidaAntes - objetivo.getPuntosVida();
+        System.out.println(" -> " + atacante.getNombre() + " ejecuta " + atacante.obtenerHabilidadEspecial()
+                + " causando " + danoReal + " de daño efectivo.");
+    }
+
+    /**
+     * Cada habilidad especial aplica un estado característico al inicio del duelo:
+     * la Bola de Fuego quema al rival, la Lluvia de Flechas lo aturde y la Carga
+     * con Escudo potencia el ataque del propio guerrero.
+     */
+    private static void aplicarEstadoHabilidad(Problema01_Personaje atacante, Problema01_Personaje objetivo) {
+        switch (atacante.obtenerHabilidadEspecial()) {
+            case "Bola de Fuego" ->
+                objetivo.aplicarEstado(new Problema01_Estados("Quemadura", 3, "DAN_TURNO", 5));
+            case "Lluvia de Flechas" ->
+                objetivo.aplicarEstado(new Problema01_Estados("Aturdimiento", 2, "INCAPACITAR", 0));
+            case "Carga con Escudo" ->
+                atacante.aplicarEstado(new Problema01_Estados("Furia de Batalla", 3, "BUFF_MULTIPLIQUEN", 0));
+            default -> {
+                // Sin estado asociado
+            }
         }
     }
 }
