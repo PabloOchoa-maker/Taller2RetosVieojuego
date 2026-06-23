@@ -84,6 +84,7 @@ public abstract class Problema01_Personaje {
     public boolean estaVivo() {
         return this.puntosVida > 0;
     }
+    
     public String getNombre() { return nombre; }
     public int getNivel() { return nivel; }
     public int getPuntosVida() { return puntosVida; }

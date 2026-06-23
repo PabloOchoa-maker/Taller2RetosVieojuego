@@ -15,15 +15,15 @@ public class Problema01_Ejecutor {
         System.out.println("--- CONFIGURACIÓN DE PERSONAJES ---");
         System.out.print("Ingrese el nombre del Guerrero: ");
         String nomG = teclado.nextLine();
-        Problema01_Personaje guerrero = new Problema01_Guerrero(nomG, 100, 18, 10, 8);
+        Problema01_Guerrero guerrero = new Problema01_Guerrero(nomG, 100, 18, 10, 8);
 
         System.out.print("Ingrese el nombre del Mago: ");
         String nomM = teclado.nextLine();
-        Problema01_Personaje mago = new Problema01_Mago(nomM, 90, 9, 6, 17);
+        Problema01_Mago mago = new Problema01_Mago(nomM, 90, 9, 6, 17);
 
         System.out.print("Ingrese el nombre del Arquero: ");
         String nomA = teclado.nextLine();
-        Problema01_Personaje arquero = new Problema01_Arquero(nomA, 100, 14, 8, 15);
+        Problema01_Arquero arquero = new Problema01_Arquero(nomA, 100, 14, 8, 15);
 
         System.out.println("\n--- CONFIGURACION DE EQUIPAMIENTO ---");
         Arma espada = new Arma("Espada Larga", "Arma", 12);
@@ -50,7 +50,7 @@ public class Problema01_Ejecutor {
         System.out.println(guerrero.toString());
         System.out.println(mago.toString());
         System.out.println(arquero.toString());
-
+        
 
         System.out.println("--------------BATALLA 1:ESCOGA LOS PELEADORES--------------");
         while (true) {
