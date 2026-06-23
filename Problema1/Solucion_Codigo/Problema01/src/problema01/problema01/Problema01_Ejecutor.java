@@ -25,6 +25,27 @@ public class Problema01_Ejecutor {
         String nomA = teclado.nextLine();
         Problema01_Personaje arquero = new Problema01_Arquero(nomA, 100, 14, 8, 15);
 
+        System.out.println("\n--- CONFIGURACION DE EQUIPAMIENTO ---");
+        Arma espada = new Arma("Espada Larga", "Arma", 12);
+        Armadura coraza = new Armadura("Coraza de Hierro", "Armadura", 7);
+        Arma arco = new Arma("Arco Elfico", "Arma", 9);
+
+        guerrero.agregarObjeto(espada);
+        guerrero.equipar(espada);
+
+        mago.agregarObjeto(coraza);
+        mago.equipar(coraza);
+
+        arquero.agregarObjeto(arco);
+        arquero.equipar(arco);
+
+        System.out.println(guerrero.getNombre() + " equipa " + espada.getNombre() + " (+"
+                + espada.getModificadorAtaque() + " ataque)");
+        System.out.println(mago.getNombre() + " equipa " + coraza.getNombre() + " (+"
+                + coraza.getModificadorDefensa() + " defensa)");
+        System.out.println(arquero.getNombre() + " equipa " + arco.getNombre() + " (+"
+                + arco.getModificadorAtaque() + " ataque)");
+
         System.out.println("\n--- ESTADO INICIAL DE LOS HEROES ---");
         System.out.println(guerrero.toString());
         System.out.println(mago.toString());

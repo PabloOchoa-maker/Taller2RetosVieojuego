@@ -9,11 +9,11 @@ public class Problema01_Mago extends Problema01_Personaje {
     }
     @Override
     public int calcularAtaque() {
-        return this.fuerza + this.poderMagico;
+        return this.fuerza + this.poderMagico + getBonusAtaque();
     }
     @Override
     public int calcularDefensa() {
-        return this.defensa + (this.poderMagico / 2);
+        return this.defensa + (this.poderMagico / 2) + getBonusDefensa();
     }
     @Override
     public String obtenerHabilidadEspecial() {
