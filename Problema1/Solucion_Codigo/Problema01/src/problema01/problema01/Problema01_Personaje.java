@@ -23,6 +23,10 @@ public abstract class Problema01_Personaje {
 
     protected java.util.List<Problema01_Estados> listaEstados = new java.util.ArrayList<>();
 
+    // ============================================================
+    //   CONSTRUCTOR
+    // ============================================================
+
     public Problema01_Personaje(String nombre, int puntosVidaMaximos, int fuerza, int defensa) {
         this.nombre = nombre;
         this.nivel = 1;
@@ -37,6 +41,25 @@ public abstract class Problema01_Personaje {
         this.energia = this.energiaMaxima;
         this.cooldownActual = 0;
     }
+
+    // ============================================================
+    //   MÉTODOS ABSTRACTOS
+    // ============================================================
+
+    public abstract int obtenerDanoBase();
+
+    public abstract int calcularDefensa();
+    public abstract String obtenerHabilidadEspecial();
+
+    /** Energía (maná) que cuesta lanzar la habilidad especial. */
+    public abstract int getCostoEnergiaHabilidad();
+
+    /** Turnos de recarga (cooldown) tras usar la habilidad especial. */
+    public abstract int getCooldownHabilidad();
+
+    // ============================================================
+    //   INVENTARIO Y EQUIPAMIENTO
+    // ============================================================
 
     public void agregarObjeto(Objeto objeto) {
         this.inventario.add(objeto);
@@ -62,8 +85,9 @@ public abstract class Problema01_Personaje {
         return 0;
     }
 
-    public Objeto getObjetoEquipado() { return objetoEquipado; }
-    public ArrayList<Objeto> getInventario() { return inventario; }
+    // ============================================================
+    //   SISTEMA DE ESTADOS (efectos temporales)
+    // ============================================================
 
     public void aplicarEstado(Problema01_Estados nuevoEstado) {
         this.listaEstados.add(nuevoEstado);
@@ -92,7 +116,7 @@ public abstract class Problema01_Personaje {
                 if (this.puntosVida < 0) {
                     this.puntosVida = 0;
                 }
-                System.out.println(" -> [" + estado.getNombre().toUpperCase() + "] " + this.nombre 
+                System.out.println(" -> [" + estado.getNombre().toUpperCase() + "] " + this.nombre
                         + " sufre " + danoVeneno + " de daño por veneno. (PV restantes: " + this.puntosVida + ")");
             }
 
@@ -118,6 +142,10 @@ public abstract class Problema01_Personaje {
         return this.estaVivo() && puedeAtacar;
     }
 
+    // ============================================================
+    //   COMBATE
+    // ============================================================
+
     public int calcularAtaque() {
         int danoFinal = obtenerDanoBase() + getBonusAtaque();
 
@@ -126,47 +154,6 @@ public abstract class Problema01_Personaje {
         }
 
         return danoFinal;
-    }
-
-    public abstract int obtenerDanoBase();
-
-    public abstract int calcularDefensa();
-    public abstract String obtenerHabilidadEspecial();
-
-    /** Energía (maná) que cuesta lanzar la habilidad especial. */
-    public abstract int getCostoEnergiaHabilidad();
-
-    /** Turnos de recarga (cooldown) tras usar la habilidad especial. */
-    public abstract int getCooldownHabilidad();
-
-    // ============================================================
-    //   SISTEMA DE MANÁ/ENERGÍA Y COOLDOWN (estados temporales)
-    // ============================================================
-
-    /**
-     * Recupera energía y reduce el cooldown. Debe invocarse al inicio de
-     * cada turno del personaje para gestionar sus estados temporales.
-     */
-    public void regenerarRecursos() {
-        if (this.energia < this.energiaMaxima) {
-            this.energia += REGENERACION_ENERGIA;
-            if (this.energia > this.energiaMaxima) {
-                this.energia = this.energiaMaxima;
-            }
-        }
-        if (this.cooldownActual > 0) {
-            this.cooldownActual--;
-        }
-    }
-
-    /** La habilidad está disponible solo cuando no está en recarga. */
-    public boolean habilidadDisponible() {
-        return this.cooldownActual == 0;
-    }
-
-    /** Indica si el personaje dispone de energía para lanzar la habilidad. */
-    public boolean tieneEnergiaSuficiente() {
-        return this.energia >= getCostoEnergiaHabilidad();
     }
 
     /**
@@ -209,6 +196,44 @@ public abstract class Problema01_Personaje {
         }
     }
 
+    public boolean estaVivo() {
+        return this.puntosVida > 0;
+    }
+
+    // ============================================================
+    //   SISTEMA DE MANÁ/ENERGÍA Y COOLDOWN
+    // ============================================================
+
+    /**
+     * Recupera energía y reduce el cooldown. Debe invocarse al inicio de
+     * cada turno del personaje para gestionar sus estados temporales.
+     */
+    public void regenerarRecursos() {
+        if (this.energia < this.energiaMaxima) {
+            this.energia += REGENERACION_ENERGIA;
+            if (this.energia > this.energiaMaxima) {
+                this.energia = this.energiaMaxima;
+            }
+        }
+        if (this.cooldownActual > 0) {
+            this.cooldownActual--;
+        }
+    }
+
+    /** La habilidad está disponible solo cuando no está en recarga. */
+    public boolean habilidadDisponible() {
+        return this.cooldownActual == 0;
+    }
+
+    /** Indica si el personaje dispone de energía para lanzar la habilidad. */
+    public boolean tieneEnergiaSuficiente() {
+        return this.energia >= getCostoEnergiaHabilidad();
+    }
+
+    // ============================================================
+    //   PROGRESIÓN
+    // ============================================================
+
     public void ganarExperiencia(int exp) {
         this.experiencia += exp;
         if (this.experiencia >= 100) {
@@ -221,10 +246,10 @@ public abstract class Problema01_Personaje {
         }
     }
 
-    public boolean estaVivo() {
-        return this.puntosVida > 0;
-    }
-    
+    // ============================================================
+    //   GETTERS
+    // ============================================================
+
     public String getNombre() { return nombre; }
     public int getNivel() { return nivel; }
     public int getPuntosVida() { return puntosVida; }
@@ -235,6 +260,12 @@ public abstract class Problema01_Personaje {
     public int getEnergia() { return energia; }
     public int getEnergiaMaxima() { return energiaMaxima; }
     public int getCooldownActual() { return cooldownActual; }
+    public Objeto getObjetoEquipado() { return objetoEquipado; }
+    public ArrayList<Objeto> getInventario() { return inventario; }
+
+    // ============================================================
+    //   REPRESENTACIÓN
+    // ============================================================
 
     @Override
     public String toString() {
